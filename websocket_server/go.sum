@@ -1,3 +1,5 @@
+github.com/anthropics/anthropic-sdk-go v1.11.0 h1:Ic72+3QvCwZA/nHgkVNXkfU7ktEEv9CZUnBech9HuK4=
+github.com/anthropics/anthropic-sdk-go v1.11.0/go.mod h1:WTz31rIUHUHqai2UslPpw5CwXrQP3geYBioRV4WOLvE=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
