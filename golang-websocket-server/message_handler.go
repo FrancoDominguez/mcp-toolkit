@@ -29,5 +29,4 @@ func HandleMessageProcessing(message []byte) (string, error){
 
 	fmt.Printf("OpenAI response: '%s'\n", chat_completion.Choices[0].Message.Content)
 	return string(chat_completion.Choices[0].Message.Content), nil
-
 }
