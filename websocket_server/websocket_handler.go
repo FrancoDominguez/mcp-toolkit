@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -57,11 +59,17 @@ func processMessage(conn *websocket.Conn, message string) (string, error){
 			conn.WriteMessage(websocket.TextMessage, []byte("Processing command: " + message))
 			processedResponse = "Command has been processed: " + message
 		case '#':
-			fmt.Printf("Processing agent request: '%s'\n", message)
-			conn.WriteMessage(websocket.TextMessage, []byte("Processing agent request: " + message))
-			response, err := HandleMessageProcessingAgent(message)
+			agent := strings.Split(message, " ")[0][1:]
+			if len(agent) == 0 {
+				agent = "custom agent"
+			}
+			displayMessage := fmt.Sprintf("Processing agent request with: '%s'", agent)
+			fmt.Println(displayMessage)
+			conn.WriteMessage(websocket.TextMessage, []byte(displayMessage))
+			response, err := HandleAgentCall(message, agent)
 			if err != nil {
 				fmt.Println("Error processing message:", err)
+				return "", err
 			}
 			processedResponse = response
 		default:

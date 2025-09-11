@@ -24,7 +24,18 @@ type Message struct {
     Text string `json:"text"`
 }
 
-func handleMessageProcessingAnthropic(message string) (string, error){
+func HandleAgentCall(message string, agentType string) (string, error){
+	switch agentType {
+		case "anthropic":
+			return handleLlmCallAnthropic(message)
+		case "openai":
+			return handleLlmCallOpenAI(message)
+		default:
+			return handleLlmCallCustomAgent(message)
+	}
+}
+
+func handleLlmCallAnthropic(message string) (string, error){
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	client := anthropic.NewClient(
 		claudeOption.WithAPIKey(apiKey),
@@ -53,7 +64,7 @@ func handleMessageProcessingAnthropic(message string) (string, error){
 	return text, nil
 }
 
-func HandleMessageProcessingOpenAI(message string) (string, error){
+func handleLlmCallOpenAI(message string) (string, error){
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	client := openai.NewClient(openaiOption.WithAPIKey(apiKey))
 
@@ -75,7 +86,7 @@ func HandleMessageProcessingOpenAI(message string) (string, error){
 	return string(response.Choices[0].Message.Content), nil
 }
 
-func HandleMessageProcessingAgent(message string) (string, error){
+func handleLlmCallCustomAgent(message string) (string, error){
 	url := os.Getenv("AGENT_URL")
 	context_db_url := "insert context here"
 	system_prompt := fetchSystemPrompt()
