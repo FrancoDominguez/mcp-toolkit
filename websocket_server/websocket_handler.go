@@ -59,7 +59,7 @@ func processMessage(conn *websocket.Conn, message string) (string, error){
 		case '#':
 			fmt.Printf("Processing agent request: '%s'\n", message)
 			conn.WriteMessage(websocket.TextMessage, []byte("Processing agent request: " + message))
-			response, err := handleMessageProcessingAnthropic(message)
+			response, err := HandleMessageProcessingAgent(message)
 			if err != nil {
 				fmt.Println("Error processing message:", err)
 			}

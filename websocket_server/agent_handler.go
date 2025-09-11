@@ -1,16 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"context"
-	"os"
 	"encoding/json"
-	"github.com/openai/openai-go/v2"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"github.com/anthropics/anthropic-sdk-go"
-
+	"github.com/openai/openai-go/v2"
 	claudeOption "github.com/anthropics/anthropic-sdk-go/option"
 	openaiOption "github.com/openai/openai-go/v2/option"
 )
+
+type AgentResponse struct {
+	Status string `json:"status"`
+	Message string `json:"message"`
+}
+
+type Message struct {
+    Type string `json:"type"`
+    Text string `json:"text"`
+}
 
 func handleMessageProcessingAnthropic(message string) (string, error){
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
@@ -18,11 +30,7 @@ func handleMessageProcessingAnthropic(message string) (string, error){
 		claudeOption.WithAPIKey(apiKey),
 	)
 
-	systemPromptBytes, err := os.ReadFile("system_prompt.txt")
-	if err != nil {
-		systemPromptBytes = []byte("You are a helpful assistant")
-	}
-	systemPrompt := string(systemPromptBytes)
+	systemPrompt := fetchSystemPrompt()
 
 	response, err := client.Messages.New(context.Background(), anthropic.MessageNewParams{
 		Model:     anthropic.ModelClaude3_5SonnetLatest,
@@ -49,11 +57,13 @@ func HandleMessageProcessingOpenAI(message string) (string, error){
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	client := openai.NewClient(openaiOption.WithAPIKey(apiKey))
 
+	systemPrompt := fetchSystemPrompt()
+
 	fmt.Printf("Processing '%s' as a message\n", message)
 	response, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
 		Model: openai.ChatModelGPT4oMini,
 		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.SystemMessage(""),
+			openai.SystemMessage(systemPrompt),
 			openai.UserMessage(message),
 		},
 	})
@@ -65,14 +75,44 @@ func HandleMessageProcessingOpenAI(message string) (string, error){
 	return string(response.Choices[0].Message.Content), nil
 }
 
-type Message struct {
-    Type string `json:"type"`
-    Text string `json:"text"`
+func HandleMessageProcessingAgent(message string) (string, error){
+	url := os.Getenv("AGENT_URL")
+	context_db_url := "insert context here"
+	system_prompt := fetchSystemPrompt()
+	request_body := fmt.Sprintf("{\"system_prompt\": \"%s\", \"user_prompt\": \"%s\", \"context_db_url\": \"%s\"}", system_prompt, message, context_db_url)
+	data := []byte(request_body)
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/agent/prompt", url), bytes.NewBuffer(data))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var response = AgentResponse{}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Message, nil
 }
 
 func extractText(raw []byte) (string, error) {
     var messages []Message
-    if err := json.Unmarshal(raw, &messages); err != nil {
+    err := json.Unmarshal(raw, &messages)
+	if err != nil {
         return "", err
     }
 
@@ -81,4 +121,14 @@ func extractText(raw []byte) (string, error) {
     }
 
     return "", nil
+}
+
+func fetchSystemPrompt() string {
+	systemPromptPath := os.Getenv("SYSTEM_PROMPT_PATH")
+	systemPromptBytes, err := os.ReadFile(systemPromptPath)
+	if err != nil {
+		systemPromptBytes = []byte("You are a helpful assistant")
+	}
+	systemPrompt := string(systemPromptBytes)
+	return systemPrompt
 }
