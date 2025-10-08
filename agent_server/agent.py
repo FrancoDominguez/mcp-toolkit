@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from logger import logger
 from contextlib import AsyncExitStack
 from agents.mcp.server import MCPServerStdio
-from agents import Agent, Runner
+from agents import Agent, Runner, SQLiteSession
 from prompt_request import PromptRequest
 
 load_dotenv()
@@ -33,20 +33,20 @@ class MyAgent:
                 try:
                     await stack.enter_async_context(server)
                 except Exception as e:
-                    self.logger.error(
-                        f"Removing mcp server from agent config, error: {e}"
-                    )
+                    self.logger.error(f"Removing mcp server from agent config, error: {e}")
                     to_remove.append(server)
 
             for s in to_remove:
                 self.mcp_servers.remove(s)
+            
+            session = SQLiteSession("my_session")
 
             agent = Agent(
                 name="Jarvis",
                 instructions=prompt_request.system_prompt,
                 mcp_servers=self.mcp_servers,
             )
-            result = await Runner.run(agent, prompt_request.user_prompt)
+            result = await Runner.run(agent, prompt_request.user_prompt, session=session)
             self.logger.info(f"Result: '{result.final_output}'")
             return result.final_output
 
