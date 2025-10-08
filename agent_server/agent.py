@@ -13,11 +13,12 @@ class MyAgent:
     def __init__(self):
         self.logger = logger
         self.mcp_servers = [
-            # MCPServerStdio(
-            #     name="calculator",
-            #     params={"command": "uvx", "args": ["mcp-calculator-demo"]},
-            #     cache_tools_list=True,
-            # ),
+            MCPServerStdio(
+                name="gmail-mcp",
+                params={
+                    "url": "http://localhost:8000/sse"
+                }
+            )
         ]
 
     async def handle_request(self, prompt_request: PromptRequest) -> str:
@@ -35,7 +36,6 @@ class MyAgent:
                 except Exception as e:
                     self.logger.error(f"Removing mcp server from agent config, error: {e}")
                     to_remove.append(server)
-
             for s in to_remove:
                 self.mcp_servers.remove(s)
             
@@ -50,24 +50,3 @@ class MyAgent:
             self.logger.info(f"Result: '{result.final_output}'")
             return result.final_output
 
-
-if __name__ == "__main__":
-    request_index = sys.argv[1]
-    agent = MyAgent()
-
-    requests = [
-        PromptRequest(
-            system_prompt="You are a funny assistant, your objective is to make people laugh",
-            user_prompt="Tell me a short joke",
-            context_prompt="",
-        ),
-        PromptRequest(
-            system_prompt="You are a math expert, you can only use the calculator tool to answer questions",
-            user_prompt="What is 125 + 35 * 76 / 32 + sqrt(98) * pi^2 + e^3?",
-            context_prompt="",
-        ),
-    ]
-
-    request = requests[int(request_index)]
-
-    asyncio.run(agent.handle_request(request))
