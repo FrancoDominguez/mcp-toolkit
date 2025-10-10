@@ -13,6 +13,7 @@ load_dotenv()
 class MyAgent:
     def __init__(self):
         self.logger = logger
+        self.session_path = "./session.db"
         self.mcp_servers = [
             MCPServerStdio(
                 name="gmail",
@@ -45,7 +46,7 @@ class MyAgent:
             end_time = time.time()
             self.logger.info(f"MCP server initialization completed in {end_time - start_time:.2f} seconds")
             
-            session = SQLiteSession("my_session")
+            session = SQLiteSession("my_session", self.session_path)
 
             agent = Agent(
                 name="Jarvis",
@@ -55,4 +56,3 @@ class MyAgent:
             result = await Runner.run(agent, prompt_request.user_prompt, session=session)
             self.logger.info(f"Result: '{result.final_output}'")
             return result.final_output
-
