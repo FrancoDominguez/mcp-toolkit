@@ -4,7 +4,16 @@ import (
 	"net/http"
 	"log"
 	"github.com/joho/godotenv"
+	"os"
+	"fmt"
 )
+
+var systemPromptFolder = os.Getenv("SYSTEM_PROMPT_FOLDER_NAME")
+
+var app App = App{
+	chatSessionId: "my_session",
+	systemPromptPath: fmt.Sprintf("%s/%s", systemPromptFolder, "helpful_agent.txt"),
+}
 
 func main() {
 	err := godotenv.Load()

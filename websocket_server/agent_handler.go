@@ -59,8 +59,10 @@ func handleLlmCallCustomAgent(message string) (string, error){
 }
 
 func fetchSystemPrompt() string {
-	systemPromptPath := os.Getenv("SYSTEM_PROMPT_PATH")
-	systemPromptBytes, err := os.ReadFile(systemPromptPath)
+	systemPromptFile := app.systemPromptPath
+
+	systemPromptBytes, err := os.ReadFile(systemPromptFile)
+
 	if err != nil {
 		systemPromptBytes = []byte("You are a helpful assistant")
 	}
