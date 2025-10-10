@@ -241,3 +241,5 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+gcp-oauth.keys.json
