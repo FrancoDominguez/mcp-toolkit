@@ -1,5 +1,6 @@
 import sys
 import asyncio
+import time
 from dotenv import load_dotenv
 from logger import logger
 from contextlib import AsyncExitStack
@@ -14,9 +15,10 @@ class MyAgent:
         self.logger = logger
         self.mcp_servers = [
             MCPServerStdio(
-                name="gmail-mcp",
+                name="gmail",
                 params={
-                    "url": "http://localhost:8000/sse"
+                    "command": "npx",
+                    "args": ["@gongrzhe/server-gmail-autoauth-mcp"]
                 }
             )
         ]
@@ -27,6 +29,7 @@ class MyAgent:
         self.logger.info(f"User prompt: '{prompt_request.user_prompt}'")
 
         async with AsyncExitStack() as stack:
+            start_time = time.time()
             to_remove = []
             for server in list(
                 self.mcp_servers
@@ -38,6 +41,9 @@ class MyAgent:
                     to_remove.append(server)
             for s in to_remove:
                 self.mcp_servers.remove(s)
+            
+            end_time = time.time()
+            self.logger.info(f"MCP server initialization completed in {end_time - start_time:.2f} seconds")
             
             session = SQLiteSession("my_session")
 
