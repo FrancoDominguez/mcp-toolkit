@@ -39,6 +39,7 @@ func handleConnectionStream(conn *websocket.Conn, connectionWg *sync.WaitGroup) 
 		}
 		message := string(messageSlice)
 
+		fmt.Printf("\n\n========================================")
 		response, err := processMessage(conn, message)
 		if err != nil {
 			fmt.Printf("Error: %s", err)
@@ -57,7 +58,7 @@ func processMessage(conn *websocket.Conn, message string) (string, error){
 		case '/':
 			fmt.Println("Processing command: ", message)
 			conn.WriteMessage(websocket.TextMessage, []byte("Processing command: " + message))
-			commandOutputMessage, err := HandleCommand(agentConfig, message[1:])
+			commandOutputMessage, err := HandleCommand(message[1:])
 			if err != nil {
 				fmt.Printf("Error: %s", err)
 				switch {

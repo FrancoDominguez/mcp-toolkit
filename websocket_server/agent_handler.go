@@ -16,13 +16,10 @@ type AgentResponse struct {
 
 func handleLlmCallCustomAgent(message string) (string, error){
 	url := os.Getenv("AGENT_URL")
-	context_db_url := "insert context here"
-	systemPrompt := fetchSystemPrompt()
-
 	requestBody := map[string]string{
-		"system_prompt": systemPrompt,
+		"system_prompt": agentConfig.SystemPrompt,
 		"user_prompt": message,
-		"context_db_url": context_db_url,
+		"conversation_id": agentConfig.ConversationId,
 	}
 
 	data, err := json.Marshal(requestBody)
@@ -56,14 +53,4 @@ func handleLlmCallCustomAgent(message string) (string, error){
 	}
 
 	return response.Message, nil
-}
-
-func fetchSystemPrompt() string {
-	systemPromptPath := os.Getenv("SYSTEM_PROMPT_PATH")
-	systemPromptBytes, err := os.ReadFile(systemPromptPath)
-	if err != nil {
-		systemPromptBytes = []byte("You are a helpful assistant")
-	}
-	systemPrompt := string(systemPromptBytes)
-	return systemPrompt
 }
