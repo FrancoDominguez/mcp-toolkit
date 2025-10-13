@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-
+	"errors"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,7 +14,7 @@ var upgrader = websocket.Upgrader{
     },
 }
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	var connectionWg sync.WaitGroup
 
     conn, err := upgrader.Upgrade(w, r, nil)
@@ -41,7 +41,9 @@ func handleConnectionStream(conn *websocket.Conn, connectionWg *sync.WaitGroup) 
 
 		response, err := processMessage(conn, message)
 		if err != nil {
-			fmt.Println("Error processing message:", err)
+			fmt.Printf("Error: %s", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			continue
 		}
 		fmt.Println("Response: ", response)
 		conn.WriteMessage(websocket.TextMessage, []byte(response))
@@ -49,25 +51,35 @@ func handleConnectionStream(conn *websocket.Conn, connectionWg *sync.WaitGroup) 
 }
 
 func processMessage(conn *websocket.Conn, message string) (string, error){
-
 	firstChar := message[0]
 	processedResponse := ""
 	switch firstChar {
 		case '/':
 			fmt.Println("Processing command: ", message)
 			conn.WriteMessage(websocket.TextMessage, []byte("Processing command: " + message))
-			processedResponse = ""
+			commandOutputMessage, err := HandleCommand(agentConfig, message[1:])
+			if err != nil {
+				fmt.Printf("Error: %s", err)
+				switch {
+				case errors.Is(err, ErrUnknownCommand):
+					return "Unknown command", nil
+				case errors.Is(err, ErrSystemPromptNotFound):
+					return "System prompt not found", nil
+				default:
+					return "", fmt.Errorf("ErrProcessingCommand: %w", err)
+				}
+			}
+			processedResponse = commandOutputMessage
 		case '#':
-			prompt := message[2:]
-			displayMessage := fmt.Sprintf("Processing message: '%s'", prompt)
+			prompt := message[1:]
+			displayMessage := fmt.Sprintf("Processing agent chat: '%s'", prompt)
 			fmt.Println(displayMessage)
 			conn.WriteMessage(websocket.TextMessage, []byte(displayMessage))
-			response, err := handleLlmCallCustomAgent(prompt)
+			agentResponse, err := handleLlmCallCustomAgent(prompt)
 			if err != nil {
-				fmt.Println("Error processing message:", err)
-				return "", err
+				return "", fmt.Errorf("ErrProcessingAgentChat: %w", err)
 			}
-			processedResponse = response
+			processedResponse = agentResponse
 
 		default:
 			fmt.Printf("Default message processing: '%s'", message)

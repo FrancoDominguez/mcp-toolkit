@@ -45,7 +45,7 @@ class MyAgent:
             end_time = time.time()
             self.logger.info(f"MCP server initialization completed in {end_time - start_time:.2f} seconds")
             
-            session = SQLiteSession("my_session")
+            session = SQLiteSession("new_session", "session.db")
 
             agent = Agent(
                 name="Jarvis",
