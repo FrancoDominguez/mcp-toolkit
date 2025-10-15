@@ -33,6 +33,10 @@ func (a *Agent) SetSystemPrompt(systemPromptName string) error {
 	return nil
 }
 
+func (a *Agent) SetConversationHistory(conversation_id string) {
+	a.ConversationId = conversation_id
+}
+
 func fetchSystemPrompt(systemPromptName string) (string, error) {
 	systemPromptFolderPath := os.Getenv("SYSTEM_PROMPT_PATH")
 	if systemPromptFolderPath == "" {

@@ -1,5 +1,3 @@
-import sys
-import asyncio
 import time
 from dotenv import load_dotenv
 from logger import logger
@@ -45,7 +43,7 @@ class MyAgent:
             end_time = time.time()
             self.logger.info(f"MCP server initialization completed in {end_time - start_time:.2f} seconds")
             
-            session = SQLiteSession("new_session", "session.db")
+            session = SQLiteSession(prompt_request.conversation_id, "session.db")
 
             agent = Agent(
                 name="Jarvis",

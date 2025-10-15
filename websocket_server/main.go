@@ -16,7 +16,7 @@ func main() {
 
 	agentConfig = &Agent{
 		Name: "Jarvis",
-		SystemPrompt: "",
+		SystemPrompt: "default",
 		ConversationId: "",
 	}
 
