@@ -27,7 +27,6 @@ func handleLlmCallCustomAgent(message string) (string, error){
 		return "", err
 	}
 	
-	fmt.Printf("Processing '%s' as a message\n", message)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/agent/prompt", url), bytes.NewBuffer(data))
 	if err != nil {
 		return "", err

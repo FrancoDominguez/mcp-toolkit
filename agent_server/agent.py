@@ -5,7 +5,7 @@ from contextlib import AsyncExitStack
 from agents.mcp.server import MCPServerStdio
 from agents import Agent, Runner, SQLiteSession
 from prompt_request import PromptRequest
-
+import os
 load_dotenv()
 
 class MyAgent:
@@ -43,7 +43,7 @@ class MyAgent:
             end_time = time.time()
             self.logger.info(f"MCP server initialization completed in {end_time - start_time:.2f} seconds")
             
-            session = SQLiteSession(prompt_request.conversation_id, "session.db")
+            session = SQLiteSession(prompt_request.conversation_id, os.getenv("SESSION_DB_PATH"))
 
             agent = Agent(
                 name="Jarvis",
@@ -53,4 +53,3 @@ class MyAgent:
             result = await Runner.run(agent, prompt_request.user_prompt, session=session)
             self.logger.info(f"Result: '{result.final_output}'")
             return result.final_output
-

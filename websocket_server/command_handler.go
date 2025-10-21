@@ -6,6 +6,7 @@ import (
 )
 
 var ErrUnknownCommand = errors.New("unknown command")
+var ErrorHandlingCommand = errors.New("error handling command")
 
 func HandleCommand(message string) (string, error){
 	commandArgs := strings.Split(message, " ")
@@ -16,7 +17,7 @@ func HandleCommand(message string) (string, error){
 	case "ssp":
 		err := agentConfig.SetSystemPrompt(args[0])
 		if err != nil {
-			return "", fmt.Errorf("ErrorHandlingCommand: %w", err)
+			return "", ErrorHandlingCommand
 		}
 		return fmt.Sprintf("System prompt set to: %s\n", args[0]), nil
 
