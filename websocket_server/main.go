@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var agentConfig *Agent
+var agentConfig *AgentConfig
 
 func main() {
 	err := godotenv.Load()
@@ -14,11 +14,7 @@ func main() {
 		log.Fatal("Error loading .env file:", err)
 	}
 
-	agentConfig = &Agent{
-		Name: "Jarvis",
-		SystemPrompt: "default",
-		ConversationId: "",
-	}
+	agentConfig = NewAgentConfig()
 
     http.HandleFunc("/ws", websocketHandler)
     log.Println("WebSocket server started on ws://localhost:8080/ws")

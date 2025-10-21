@@ -9,32 +9,37 @@ import (
 var ErrSystemPromptNotFound = errors.New("SystemPromptNotFound")
 var ErrSystemPromptReadError = errors.New("ReadEror")
 
-type Agent struct {
+type AgentConfig struct {
 	Name string
 	SystemPrompt string
 	ConversationId string
 }
 
-func (a *Agent) SetSystemPrompt(systemPromptName string) error {
+func NewAgentConfig() *AgentConfig {
+	return &AgentConfig{
+		Name: "Jarvis",
+		SystemPrompt: "default",
+		ConversationId: NewUUID(),
+	}
+}
+
+func (a *AgentConfig) SetSystemPrompt(systemPromptName string) error {
 	systemPrompt, err := fetchSystemPrompt(systemPromptName)
 	if err != nil {
-		switch {
-		case errors.Is(err, ErrSystemPromptNotFound):
-			return ErrSystemPromptNotFound
-		case errors.Is(err, ErrSystemPromptReadError):
-			return ErrSystemPromptReadError
-		default:
-			return err
-		}
+		return err
 	}
-
-	fmt.Printf("System prompt set to: %s", systemPrompt)
 	a.SystemPrompt = systemPrompt
 	return nil
 }
 
-func (a *Agent) SetConversationHistory(conversation_id string) {
-	a.ConversationId = conversation_id
+func (a *AgentConfig) SetConversationHistory(conversationId string) {
+	a.ConversationId = conversationId
+}
+
+func (a *AgentConfig) NewConversation() (string) {
+	conversationId := NewUUID()
+	a.SetConversationHistory(conversationId)
+	return conversationId
 }
 
 func fetchSystemPrompt(systemPromptName string) (string, error) {

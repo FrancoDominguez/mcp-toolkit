@@ -13,19 +13,27 @@ func HandleCommand(message string) (string, error){
 	args := commandArgs[1:]
 
 	switch command {
+
+	// System prompt
 	case "/ssp":
 		err := agentConfig.SetSystemPrompt(args[0])
 		if err != nil {
 			return "", err
 		}
 		return fmt.Sprintf("System prompt set to: '%s'\n", args[0]), nil
-
 	case "/gsp":
 		return fmt.Sprintf("System prompt: '%s'\n", agentConfig.SystemPrompt), nil
 
+
+	// Conversation history
+	case "/gch":
+		return fmt.Sprintf("Conversation history: '%s'\n", agentConfig.ConversationId), nil
 	case "/sch":
 		agentConfig.SetConversationHistory(args[0])
 		return fmt.Sprintf("Conversation history set to: '%s'\n", args[0]), nil
+	case "/nc":
+		conversationId := agentConfig.NewConversation()
+		return fmt.Sprintf("New conversation history created: '%s'\n", conversationId), nil
 
 	default:
 		return "", ErrUnknownCommand
