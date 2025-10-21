@@ -6,7 +6,6 @@ import (
 )
 
 var ErrUnknownCommand = errors.New("unknown command")
-var ErrorHandlingCommand = errors.New("error handling command")
 
 func HandleCommand(message string) (string, error){
 	commandArgs := strings.Split(message, " ")
@@ -14,17 +13,17 @@ func HandleCommand(message string) (string, error){
 	args := commandArgs[1:]
 
 	switch command {
-	case "ssp":
+	case "/ssp":
 		err := agentConfig.SetSystemPrompt(args[0])
 		if err != nil {
-			return "", ErrorHandlingCommand
+			return "", err
 		}
 		return fmt.Sprintf("System prompt set to: %s\n", args[0]), nil
 
-	case "gsp":
+	case "/gsp":
 		return fmt.Sprintf("System prompt: '%s'\n", agentConfig.SystemPrompt), nil
 
-	case "sch":
+	case "/sch":
 		agentConfig.SetConversationHistory(args[0])
 		return fmt.Sprintf("Conversation history set to: %s\n", args[0]), nil
 

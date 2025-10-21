@@ -20,11 +20,11 @@ func (a *Agent) SetSystemPrompt(systemPromptName string) error {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrSystemPromptNotFound):
-			return fmt.Errorf("setSystemPromptError: %w", ErrSystemPromptNotFound)
+			return ErrSystemPromptNotFound
 		case errors.Is(err, ErrSystemPromptReadError):
-			return fmt.Errorf("setSystemPromptError: %w", ErrSystemPromptReadError)
+			return ErrSystemPromptReadError
 		default:
-			return fmt.Errorf("setSystemPromptError: %w", err)
+			return err
 		}
 	}
 
@@ -38,19 +38,19 @@ func (a *Agent) SetConversationHistory(conversation_id string) {
 }
 
 func fetchSystemPrompt(systemPromptName string) (string, error) {
-	systemPromptFolderPath := os.Getenv("SYSTEM_PROMPT_PATH")
+	systemPromptFolderPath := os.Getenv("SYSTEM_PROMPT_FOLDER_PATH")
 	if systemPromptFolderPath == "" {
 		systemPromptFolderPath = "./system_prompts"
 	}
 
 	systemPromptPath := fmt.Sprintf("%s/%s.txt", systemPromptFolderPath, systemPromptName)
 	if _, err := os.Stat(systemPromptPath); os.IsNotExist(err) {
-		return "", fmt.Errorf("fetchSystemPromptError: %w", ErrSystemPromptNotFound)
+		return "", ErrSystemPromptNotFound
 	}
 
 	systemPromptBytes, err := os.ReadFile(systemPromptPath)
 	if err != nil {
-		return "", fmt.Errorf("fetchSystemPromptError: %w", ErrSystemPromptReadError)
+		return "", ErrSystemPromptReadError
 	}
 	return string(systemPromptBytes), nil
 }
