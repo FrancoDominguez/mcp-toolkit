@@ -21,7 +21,6 @@ func main() {
 	}
 
     http.HandleFunc("/ws", websocketHandler)
-    http.HandleFunc("/webhook", webhookHandler)
     log.Println("WebSocket server started on ws://localhost:8080/ws")
     err = http.ListenAndServe(":8080", nil)
     if err != nil {

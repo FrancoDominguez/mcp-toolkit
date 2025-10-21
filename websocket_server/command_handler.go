@@ -18,14 +18,14 @@ func HandleCommand(message string) (string, error){
 		if err != nil {
 			return "", err
 		}
-		return fmt.Sprintf("System prompt set to: %s\n", args[0]), nil
+		return fmt.Sprintf("System prompt set to: '%s'\n", args[0]), nil
 
 	case "/gsp":
 		return fmt.Sprintf("System prompt: '%s'\n", agentConfig.SystemPrompt), nil
 
 	case "/sch":
 		agentConfig.SetConversationHistory(args[0])
-		return fmt.Sprintf("Conversation history set to: %s\n", args[0]), nil
+		return fmt.Sprintf("Conversation history set to: '%s'\n", args[0]), nil
 
 	default:
 		return "", ErrUnknownCommand
